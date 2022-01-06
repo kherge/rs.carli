@@ -1,0 +1,8 @@
+# Ignore everything.
+*
+
+# Except the ignore file.
+!/.gitignore
+
+# Except the package manifest.
+!/Cargo.toml
