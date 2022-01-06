@@ -1,0 +1,13 @@
+[package]
+name = "carli"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.57"
+
+description = "A library for rapid command line tool development."
+license = "ISC"
+authors = ["Kevin Herrera <kevin@herrera.io>"]
+homepage = "https://github.com/kherge/rs.carli"
+repository = "https://github.com/kherge/rs.carli/"
+keywords = ["cli", "fast", "quick", "rapid"]
+categories = ["command-line-interface"]
