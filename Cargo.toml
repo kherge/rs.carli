@@ -11,3 +11,6 @@ homepage = "https://github.com/kherge/rs.carli"
 repository = "https://github.com/kherge/rs.carli/"
 keywords = ["cli", "fast", "quick", "rapid"]
 categories = ["command-line-interface"]
+
+[dependencies]
+clap = "^3.0"
