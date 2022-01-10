@@ -22,7 +22,7 @@
 //!
 //! ```no_run
 //! use carli::err;
-//! use carli::error::{Error, ErrorContext, Result};
+//! use carli::error::{Context, Error, Result};
 //! use std::fs::read_to_string;
 //! use std::path::PathBuf;
 //!
@@ -69,6 +69,47 @@
 //! ```
 
 use std::{fmt, io, process, sync};
+
+/// A trait to add context to an error result.
+///
+/// This trait simplifies conditionally adding context to a [`Result`] that may be an [`Err`]. The
+/// function used to create the context message is only invoked if the result is an [`Err`], which
+/// optimizes away the call if the result is [`Ok`].
+pub trait Context {
+    /// Adds context to an error result using a closure that produces a string.
+    ///
+    /// ```no_run
+    /// use carli::error::{Context, Error, Result};
+    ///
+    /// fn creates_error() -> Result<()> {
+    ///     Err(Error::new(1).message("The original error message."))
+    /// }
+    ///
+    /// fn adds_context() -> Result<()> {
+    ///     creates_error().context(|| "Some additional context.")?;
+    ///
+    ///     Ok(())
+    /// }
+    ///
+    /// fn main() {
+    ///     if let Err(error) = adds_context() {
+    ///         error.exit();
+    ///     }
+    /// }
+    /// ```
+    fn context<F, S: Into<String>>(self, message: F) -> Self
+    where
+        F: FnOnce() -> S;
+}
+
+impl<T> Context for Result<T> {
+    fn context<F, S: Into<String>>(self, message: F) -> Self
+    where
+        F: FnOnce() -> S,
+    {
+        self.map_err(|error| error.context(message()))
+    }
+}
 
 /// An error with an exit status.
 ///
@@ -241,47 +282,6 @@ impl<T> From<sync::PoisonError<T>> for Error {
             message: Some(error.to_string()),
             status: 1,
         }
-    }
-}
-
-/// A trait to add context to an error result.
-///
-/// This trait simplifies conditionally adding context to a [`Result`] that may be an [`Err`]. The
-/// function used to create the context message is only invoked if the result is an [`Err`], which
-/// optimizes away the call if the result is [`Ok`].
-pub trait ErrorContext {
-    /// Adds context to an error result using a closure that produces a string.
-    ///
-    /// ```no_run
-    /// use carli::error::{Error, ErrorContext, Result};
-    ///
-    /// fn creates_error() -> Result<()> {
-    ///     Err(Error::new(1).message("The original error message."))
-    /// }
-    ///
-    /// fn adds_context() -> Result<()> {
-    ///     creates_error().context(|| "Some additional context.")?;
-    ///
-    ///     Ok(())
-    /// }
-    ///
-    /// fn main() {
-    ///     if let Err(error) = adds_context() {
-    ///         error.exit();
-    ///     }
-    /// }
-    /// ```
-    fn context<F, S: Into<String>>(self, message: F) -> Self
-    where
-        F: FnOnce() -> S;
-}
-
-impl<T> ErrorContext for Result<T> {
-    fn context<F, S: Into<String>>(self, message: F) -> Self
-    where
-        F: FnOnce() -> S,
-    {
-        self.map_err(|error| error.context(message()))
     }
 }
 
