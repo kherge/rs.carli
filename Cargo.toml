@@ -12,5 +12,5 @@ repository = "https://github.com/kherge/rs.carli/"
 keywords = ["cli", "fast", "quick", "rapid"]
 categories = ["command-line-interface"]
 
-[dependencies]
-clap = "^3.0"
+[dev-dependencies]
+clap = { version = "^3.0", features = ["derive"] }
