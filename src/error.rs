@@ -68,7 +68,7 @@
 //!     No such file or directory (os error 2)
 //! ```
 
-use std::{fmt, io, process};
+use std::{fmt, io, process, sync};
 
 /// An error with an exit status.
 ///
@@ -230,6 +230,16 @@ impl From<io::Error> for Error {
             context: None,
             message: Some(error.to_string()),
             status: error.raw_os_error().unwrap_or(1),
+        }
+    }
+}
+
+impl<T> From<sync::PoisonError<T>> for Error {
+    fn from(error: sync::PoisonError<T>) -> Self {
+        Self {
+            context: None,
+            message: Some(error.to_string()),
+            status: 1,
         }
     }
 }
