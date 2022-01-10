@@ -7,6 +7,10 @@
 # Except the package manifest.
 !/Cargo.toml
 
+# Except the examples.
+!/examples/
+!/examples/**
+
 # Except the source.
 !/src/
 !/src/**
