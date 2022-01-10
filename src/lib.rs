@@ -11,3 +11,9 @@ pub mod prelude {
     pub use crate::io::{Context, Standard};
     pub use crate::{err, error, errorln, outputln};
 }
+
+/// A module to easily import frequently used testing APIs.
+pub mod test {
+    pub use crate::error::Inspect;
+    pub use crate::io::Test;
+}
