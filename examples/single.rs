@@ -1,7 +1,9 @@
 //! An example for a single command application.
 //!
-//! In this example, you can see that the application is broken down into three parts: the
-//! command line options, the entrypoint, and the function that does the real work. ???
+//! In this example, you can see that the application is broken down into three parts: the command
+//! line options, the entrypoint, and the function that does the real work. For processing of the
+//! command line options, [`clap`] is being used. The entrypoint and function both use parts of
+//! [`carli`] to handle IO and errors that may result from the function.
 
 use carli::prelude::*;
 use clap::Parser;
