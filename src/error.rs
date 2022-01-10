@@ -285,6 +285,121 @@ impl<T> ErrorContext for Result<T> {
     }
 }
 
+/// A trait for inspecting the contents of error with exit statuses.
+///
+/// When this trait is brought into scope, access to the inner context, message, and status code
+/// for an instance of [`Error`] becomes accessible. The trait is primarily useful when testing
+/// error conditions of a command, and should probably not be used during normal application
+/// procedures.
+///
+/// ```
+/// use carli::error::{Error, Inspect, Result};
+///
+/// fn example() -> Result<()> {
+///     Err(Error::new(1)
+///         .message("An example error.")
+///         .context("With some context."))
+/// }
+///
+/// #[cfg(test)]
+/// mod test {
+///     use super::*;
+///
+///     fn main() {
+///         let error = example().unwrap_err();
+///
+///         assert_eq!(error.get_context(), Some(vec!["With some context."]));
+///         assert_eq!(error.get_message(), Some("An example error."));
+///         assert_eq!(error.get_status(), 1);
+///     }
+/// }
+/// ```
+pub trait Inspect {
+    /// Returns the additional context messages.
+    ///
+    /// ```
+    /// use carli::error::{Error, Inspect, Result};
+    ///
+    /// fn example() -> Result<()> {
+    ///     Err(Error::new(1).context("Some context."))
+    /// }
+    ///
+    /// #[cfg(test)]
+    /// mod test {
+    ///     use super::*;
+    ///
+    ///     fn example_context() {
+    ///         let error = example().unwrap_err();
+    ///
+    ///         assert_eq!(error.get_context(), Some(vec!["Some context."]));
+    ///     }
+    /// }
+    /// ```
+    fn get_context(&self) -> Option<Vec<&str>>;
+
+    /// Returns the original error message.
+    ///
+    /// ```
+    /// use carli::error::{Error, Inspect, Result};
+    ///
+    /// fn example() -> Result<()> {
+    ///     Err(Error::new(1).message("An example error."))
+    /// }
+    ///
+    /// #[cfg(test)]
+    /// mod test {
+    ///     use super::*;
+    ///
+    ///     fn example_message() {
+    ///         let error = example().unwrap_err();
+    ///
+    ///         assert_eq!(error.get_message(), Some("An example error."));
+    ///     }
+    /// }
+    /// ```
+    fn get_message(&self) -> Option<&str>;
+
+    /// Returns the exit status code.
+    ///
+    /// ```
+    /// use carli::error::{Error, Inspect, Result};
+    ///
+    /// fn example_status() -> Result<()> {
+    ///     Err(Error::new(1))
+    /// }
+    ///
+    /// #[cfg(test)]
+    /// mod test {
+    ///     use super::*;
+    ///
+    ///     fn main() {
+    ///         let error = example().unwrap_err();
+    ///
+    ///         assert_eq!(error.get_status(), 1);
+    ///     }
+    /// }
+    /// ```
+    fn get_status(&self) -> i32;
+}
+
+impl Inspect for Error {
+    fn get_context(&self) -> Option<Vec<&str>> {
+        if let Some(context) = &self.context {
+            Some(context.iter().map(|message| message.as_str()).collect())
+        } else {
+            None
+        }
+    }
+
+    fn get_message(&self) -> Option<&str> {
+        self.message.as_deref()
+    }
+
+    fn get_status(&self) -> i32 {
+        self.status
+    }
+}
+
 /// A specialized [`Result`] that may be an error with an exit status.
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
