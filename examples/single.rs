@@ -5,8 +5,9 @@
 //! command line options, [`clap`] is being used. The entrypoint and function both use parts of
 //! [`carli`] to handle IO and errors that may result from the function.
 
-use carli::io;
-use carli::prelude::*;
+use carli::io::Streams;
+use carli::prelude::app::*;
+use carli::prelude::cmd::*;
 use clap::Parser;
 use std::io::Write;
 
@@ -51,7 +52,7 @@ fn main() {
     let app = Application::parse();
 
     // Uses the standard input and output streams.
-    let streams = io::standard();
+    let streams = standard();
 
     // Do the real work, and exit if there is an error.
     if let Err(error) = example(&app, &streams) {
@@ -64,8 +65,7 @@ fn main() {
 #[cfg(test)]
 mod test {
     use super::{example, Application};
-    use carli::io::memory;
-    use carli::test::*;
+    use carli::prelude::test::*;
     use std::io::{Seek, SeekFrom};
 
     /// Verifies that when the `error` flag is used, the function returns a failing response.
