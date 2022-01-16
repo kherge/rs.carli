@@ -2,6 +2,7 @@
 //!
 //! In addition to simply parsing arguments, ...
 
+pub mod command;
 pub mod error;
 pub mod io;
 
