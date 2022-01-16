@@ -8,7 +8,7 @@ pub mod io;
 /// A module to easily import frequently used APIs.
 pub mod prelude {
     pub use crate::error::{Context, Error, Result};
-    pub use crate::io::{Stream, Streams};
+    pub use crate::io::{Shared, Stream, Streams};
     pub use crate::{err, error};
 }
 

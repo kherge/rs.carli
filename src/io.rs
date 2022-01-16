@@ -39,7 +39,7 @@
 //!
 //! ```no_run
 //! use carli::error::Result;
-//! use carli::io::{standard, Streams};
+//! use carli::io::{standard, Shared, Streams};
 //! use std::io::{self, Read, Write};
 //!
 //! fn example(streams: Streams) -> Result<()> {
@@ -62,6 +62,67 @@
 //! }
 //! ```
 use std::{cell, io};
+
+/// A trait for objects that manage the shared input and output streams for a command.
+///
+/// ```
+/// use carli::error::Result;
+/// use carli::io::{self, Shared};
+/// use std::io::Write;
+///
+/// fn example(streams: &dyn Shared) -> Result<()> {
+///     writeln!(streams.output(), "Hello, world!")?;
+///
+///     Ok(())
+/// }
+/// ```
+pub trait Shared {
+    /// Returns the error output stream.
+    ///
+    /// ```
+    /// use carli::error::Result;
+    /// use carli::io::Shared;
+    /// use std::io::Write;
+    ///
+    /// fn example(streams: &dyn Shared) -> Result<()> {
+    ///     writeln!(streams.error(), "Something is wrong.")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    fn error(&self) -> cell::RefMut<Stream>;
+
+    /// Returns the input stream.
+    ///
+    /// ```
+    /// use carli::error::Result;
+    /// use carli::io::Shared;
+    ///
+    /// fn example(streams: &dyn Shared) -> Result<()> {
+    ///     let string = streams.input().to_string()?;
+    ///
+    ///     println!("{}", string);
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    fn input(&self) -> cell::RefMut<Stream>;
+
+    /// Returns the global output stream.
+    ///
+    /// ```
+    /// use carli::error::Result;
+    /// use carli::io::Shared;
+    /// use std::io::Write;
+    ///
+    /// fn example(streams: &dyn Shared) -> Result<()> {
+    ///     writeln!(streams.output(), "Hello, world!")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    fn output(&self) -> cell::RefMut<Stream>;
+}
 
 /// The backing streams that are supported.
 #[derive(Debug)]
@@ -282,7 +343,7 @@ impl Stream {
 ///
 /// ```
 /// use carli::error::Result;
-/// use carli::io::{self, Streams};
+/// use carli::io::{self, Shared, Streams};
 /// use std::io::Write;
 ///
 /// fn example(streams: &Streams) -> Result<()> {
@@ -309,58 +370,6 @@ pub struct Streams {
 }
 
 impl Streams {
-    /// Returns the error output stream.
-    ///
-    /// ```
-    /// use carli::error::Result;
-    /// use carli::io::Streams;
-    /// use std::io::Write;
-    ///
-    /// fn example(streams: &Streams) -> Result<()> {
-    ///     writeln!(streams.error(), "Something is wrong.")?;
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
-    pub fn error(&self) -> cell::RefMut<Stream> {
-        self.error.borrow_mut()
-    }
-
-    /// Returns the input stream.
-    ///
-    /// ```
-    /// use carli::error::Result;
-    /// use carli::io::Streams;
-    ///
-    /// fn example(streams: &Streams) -> Result<()> {
-    ///     let string = streams.input().to_string()?;
-    ///
-    ///     println!("{}", string);
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
-    pub fn input(&self) -> cell::RefMut<Stream> {
-        self.input.borrow_mut()
-    }
-
-    /// Returns the global output stream.
-    ///
-    /// ```
-    /// use carli::error::Result;
-    /// use carli::io::Streams;
-    /// use std::io::Write;
-    ///
-    /// fn example(streams: &Streams) -> Result<()> {
-    ///     writeln!(streams.output(), "Hello, world!")?;
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
-    pub fn output(&self) -> cell::RefMut<Stream> {
-        self.output.borrow_mut()
-    }
-
     /// Creates a new instance using the given streams.
     fn new<E, I, O>(error: E, input: I, output: O) -> Self
     where
@@ -373,6 +382,20 @@ impl Streams {
             input: cell::RefCell::new(input.into()),
             output: cell::RefCell::new(output.into()),
         }
+    }
+}
+
+impl Shared for Streams {
+    fn error(&self) -> cell::RefMut<Stream> {
+        self.error.borrow_mut()
+    }
+
+    fn input(&self) -> cell::RefMut<Stream> {
+        self.input.borrow_mut()
+    }
+
+    fn output(&self) -> cell::RefMut<Stream> {
+        self.output.borrow_mut()
     }
 }
 
