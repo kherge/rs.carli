@@ -6,14 +6,25 @@ pub mod command;
 pub mod error;
 pub mod io;
 
-/// A module to easily import frequently used APIs.
+/// Provides preludes for different contexts in command line application development.
 pub mod prelude {
-    pub use crate::error::{Context, Error, Result};
-    pub use crate::io::{Shared, Stream, Streams};
-    pub use crate::{err, error};
-}
+    /// A module to easily import APIs frequently used by applications.
+    pub mod app {
+        pub use crate::command::{Execute, Main};
+        pub use crate::error::Result;
+        pub use crate::io::{standard, Shared, Stream};
+    }
 
-/// A module to easily import frequently used testing APIs.
-pub mod test {
-    pub use crate::error::Inspect;
+    /// A module to easily import APIs frequently used by subcommands.
+    pub mod cmd {
+        pub use crate::command::Execute;
+        pub use crate::err;
+        pub use crate::error::Result;
+    }
+
+    /// A module to easily import frequently used testing APIs.
+    pub mod test {
+        pub use crate::error::Inspect;
+        pub use crate::io::memory;
+    }
 }
