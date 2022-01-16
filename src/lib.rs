@@ -20,6 +20,7 @@ pub mod prelude {
         pub use crate::command::Execute;
         pub use crate::err;
         pub use crate::error::Result;
+        pub use crate::io::Shared;
     }
 
     /// A module to easily import frequently used testing APIs.
