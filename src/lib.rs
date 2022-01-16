@@ -7,13 +7,12 @@ pub mod io;
 
 /// A module to easily import frequently used APIs.
 pub mod prelude {
-    pub use crate::error::{Context as ErrorContext, Error, Result};
-    pub use crate::io::{Context, Standard};
-    pub use crate::{err, error, errorln, outputln};
+    pub use crate::error::{Context, Error, Result};
+    pub use crate::io::{Stream, Streams};
+    pub use crate::{err, error};
 }
 
 /// A module to easily import frequently used testing APIs.
 pub mod test {
     pub use crate::error::Inspect;
-    pub use crate::io::Test;
 }
