@@ -1,66 +1,66 @@
-/// Provides types used to manage input and output streams used by commands.
-///
-/// The simplest approach to creating a command is to use the standard input and output streams
-/// provided by [`std::io`]. However, using these streams directly becomes an issue when testing
-/// is necessary to verify the accuracy in how the streams are used. This module provides types
-/// that can be used as a drop-in replacement for those streams while also enabling support for
-/// both regular use and testing.
-///
-/// ### Using the streams individually
-///
-/// ```no_run
-/// use carli::error::Result;
-/// use carli::io::Stream;
-/// use std::io::{self, Read, Write};
-///
-/// fn example(mut error: Stream, mut input: Stream, mut output: Stream) -> Result<()> {
-///     writeln!(error, "Something went wrong.")?;
-///     writeln!(output, "Hello, world!")?;
-///
-///     let mut buffer = Vec::new();
-///
-///     input.read_to_end(&mut buffer)?;
-///
-///     writeln!(output, "{}", String::from_utf8_lossy(&buffer));
-///
-///     Ok(())
-/// }
-///
-/// fn main() {
-///     let error = io::stderr().into();
-///     let input = io::stdin().into();
-///     let output = io::stdout().into();
-///
-///     example(error, input, output).unwrap();
-/// }
-/// ```
-///
-/// ### Using the streams as a collection
-///
-/// ```no_run
-/// use carli::error::Result;
-/// use carli::io::{standard, Streams};
-/// use std::io::{self, Read, Write};
-///
-/// fn example(streams: Streams) -> Result<()> {
-///     writeln!(streams.error(), "Something went wrong.")?;
-///     writeln!(streams.output(), "Hello, world!")?;
-///
-///     let mut buffer = Vec::new();
-///
-///     streams.input().read_to_end(&mut buffer)?;
-///
-///     writeln!(streams.output(), "{}", String::from_utf8_lossy(&buffer));
-///
-///     Ok(())
-/// }
-///
-/// fn main() {
-///     let streams = standard();
-///
-///     example(streams).unwrap();
-/// }
-/// ```
+//! Provides types used to manage input and output streams used by commands.
+//!
+//! The simplest approach to creating a command is to use the standard input and output streams
+//! provided by [`std::io`]. However, using these streams directly becomes an issue when testing
+//! is necessary to verify the accuracy in how the streams are used. This module provides types
+//! that can be used as a drop-in replacement for those streams while also enabling support for
+//! both regular use and testing.
+//!
+//! ### Using the streams individually
+//!
+//! ```no_run
+//! use carli::error::Result;
+//! use carli::io::Stream;
+//! use std::io::{self, Read, Write};
+//!
+//! fn example(mut error: Stream, mut input: Stream, mut output: Stream) -> Result<()> {
+//!     writeln!(error, "Something went wrong.")?;
+//!     writeln!(output, "Hello, world!")?;
+//!
+//!     let mut buffer = Vec::new();
+//!
+//!     input.read_to_end(&mut buffer)?;
+//!
+//!     writeln!(output, "{}", String::from_utf8_lossy(&buffer));
+//!
+//!     Ok(())
+//! }
+//!
+//! fn main() {
+//!     let error = io::stderr().into();
+//!     let input = io::stdin().into();
+//!     let output = io::stdout().into();
+//!
+//!     example(error, input, output).unwrap();
+//! }
+//! ```
+//!
+//! ### Using the streams as a collection
+//!
+//! ```no_run
+//! use carli::error::Result;
+//! use carli::io::{standard, Streams};
+//! use std::io::{self, Read, Write};
+//!
+//! fn example(streams: Streams) -> Result<()> {
+//!     writeln!(streams.error(), "Something went wrong.")?;
+//!     writeln!(streams.output(), "Hello, world!")?;
+//!
+//!     let mut buffer = Vec::new();
+//!
+//!     streams.input().read_to_end(&mut buffer)?;
+//!
+//!     writeln!(streams.output(), "{}", String::from_utf8_lossy(&buffer));
+//!
+//!     Ok(())
+//! }
+//!
+//! fn main() {
+//!     let streams = standard();
+//!
+//!     example(streams).unwrap();
+//! }
+//! ```
 use std::{cell, io};
 
 /// The backing streams that are supported.
