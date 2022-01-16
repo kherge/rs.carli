@@ -5,8 +5,10 @@
 //! command line options, [`clap`] is being used. The entrypoint and function both use parts of
 //! [`carli`] to handle IO and errors that may result from the function.
 
+use carli::io;
 use carli::prelude::*;
 use clap::Parser;
+use std::io::Write;
 
 /// An example application that is a single command.
 #[derive(Parser)]
@@ -19,22 +21,22 @@ pub struct Application {
 /// A simple function that does the real work in the application.
 ///
 /// This is the meat-and-potatoes" of the application. The function takes the parsed command line
-/// arguments, input and output context, and does something with it. In this example, the function
+/// arguments, input and output streams, and does something with it. In this example, the function
 /// will simply use the `--error` flag to determine if the application should exit with an error or
 /// success.
-fn example(app: &Application, context: &impl Context) -> Result<()> {
+fn example(app: &Application, streams: &Streams) -> Result<()> {
     // Requesting that we produce an error?
     if app.error {
-        // Write to the error output stream managed by the context.
-        errorln!(context, "The command is about to fail!")?;
+        // Write to the error output stream.
+        writeln!(streams.error(), "The command is about to fail!")?;
 
         // Returns with an error that has a message and exit status code.
         err!(1, "The command failed.");
 
     // Expecting success?
     } else {
-        // Write to the global output stream managed by the context.
-        outputln!(context, "Hello, world!")?;
+        // Write to the global output stream.
+        writeln!(streams.output(), "Hello, world!")?;
 
         // Since the result ultimately ends up in the entrypoint function (main), we cannot
         // return any result. So, we return nothing and let the operating environment take
@@ -49,10 +51,10 @@ fn main() {
     let app = Application::parse();
 
     // Uses the standard input and output streams.
-    let context = Standard::default();
+    let streams = io::standard();
 
     // Do the real work, and exit if there is an error.
-    if let Err(error) = example(&app, &context) {
+    if let Err(error) = example(&app, &streams) {
         error.exit();
     }
 
@@ -62,7 +64,9 @@ fn main() {
 #[cfg(test)]
 mod test {
     use super::{example, Application};
+    use carli::io::memory;
     use carli::test::*;
+    use std::io::{Seek, SeekFrom};
 
     /// Verifies that when the `error` flag is used, the function returns a failing response.
     #[test]
@@ -70,11 +74,11 @@ mod test {
         // Create the `Application` instance with the error flag set.
         let app = Application { error: true };
 
-        // Create a context that we can debug.
-        let context = Test::default();
+        // Create streams that we can debug.
+        let streams = memory();
 
         // Do the real work.
-        let result = example(&app, &context);
+        let result = example(&app, &streams);
 
         // Make sure we got the error we were expecting.
         assert!(result.is_err());
@@ -85,7 +89,12 @@ mod test {
         assert_eq!(error.get_status(), 1);
 
         // Make sure the expected error output was written.
-        assert_eq!(context.to_error_vec(), b"The command is about to fail!\n");
+        streams.error().seek(SeekFrom::Start(0)).unwrap();
+
+        assert_eq!(
+            streams.error().to_string_lossy(),
+            "The command is about to fail!\n"
+        );
     }
 
     /// Verifies that the function returns a successful response if the `error` flag is not used.
@@ -94,16 +103,18 @@ mod test {
         // Create the `Application` instance without the error flag set.
         let app = Application { error: false };
 
-        // Create a context that we can debug.
-        let context = Test::default();
+        // Create streams that we can debug.
+        let streams = memory();
 
         // Do the real work.
-        let result = example(&app, &context);
+        let result = example(&app, &streams);
 
         // Make sure we got the success result we were expecting.
         assert!(result.is_ok());
 
         // Make sure the expected output was written.
-        assert_eq!(context.to_output_vec(), b"Hello, world!\n");
+        streams.output().seek(SeekFrom::Start(0)).unwrap();
+
+        assert_eq!(streams.output().to_string_lossy(), "Hello, world!\n");
     }
 }
