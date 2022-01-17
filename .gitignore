@@ -14,6 +14,9 @@
 # Except the license.
 !/LICENSE
 
+# Except the README.
+!/README.md
+
 # Except the examples.
 !/examples/
 !/examples/**
