@@ -1,6 +1,11 @@
-//! CarLI is a framework for quickly building command line application.
+//! A library for rapid command line tool development.
 //!
-//! In addition to simply parsing arguments, ...
+//! CarLI is a command line application framework for developing application that provide a single
+//! command and multiple commands. The framework also provides error types tailored for a command
+//! line experience as well as supporting test input and output streams other than those provided
+//! by [`std::io`].
+//!
+//! See [`command::Main`] for a complete example.
 
 pub mod command;
 pub mod error;
