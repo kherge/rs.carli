@@ -24,7 +24,7 @@ pub mod prelude {
     pub mod cmd {
         pub use crate::command::Execute;
         pub use crate::err;
-        pub use crate::error::Result;
+        pub use crate::error::{Context, Result};
         pub use crate::io::Shared;
     }
 
