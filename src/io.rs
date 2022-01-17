@@ -296,7 +296,7 @@ impl Stream {
     /// }
     /// ```
     pub fn to_string(&mut self) -> Result<String, io::Error> {
-        String::from_utf8(self.to_buffer()?)
+        String::from_utf8(self.as_buffer()?)
             .map_err(|error| io::Error::new(io::ErrorKind::Other, error))
     }
 
@@ -317,7 +317,7 @@ impl Stream {
     /// ```
     pub fn to_string_lossy(&mut self) -> String {
         let buffer = self
-            .to_buffer()
+            .as_buffer()
             .expect("Could not read the stream into the buffer.");
 
         String::from_utf8_lossy(&buffer).to_string()
@@ -328,7 +328,7 @@ impl Stream {
     /// This method will read the stream all the way to the end and store the contents in a
     /// buffer that is then returned. If this stream is [`StreamKind::Memory`], the the buffer
     /// position will be reset to the beginning before reading.
-    fn to_buffer(&mut self) -> Result<Vec<u8>, io::Error> {
+    fn as_buffer(&mut self) -> Result<Vec<u8>, io::Error> {
         use std::io::Read;
 
         let mut buffer = Vec::new();

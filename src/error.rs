@@ -8,11 +8,11 @@
 //! ```no_run
 //! use std::process::exit;
 //!
-//! fn main() {
-//!     eprintln!("Something went wrong!");
+//! # fn main() {
+//! eprintln!("Something went wrong!");
 //!
-//!     exit(1);
-//! }
+//! exit(1);
+//! # }
 //! ```
 //!
 //! This module provides a structured way of producing these errors while allowing other operations
@@ -120,21 +120,21 @@ impl<T> Context for Result<T> {
 /// ```no_run
 /// use carli::error::Error;
 ///
-/// fn main() {
-///     // The exit status is always required.
-///     let error = Error::new(1)
+/// # fn main() {
+/// // The exit status is always required.
+/// let error = Error::new(1)
 ///
-///         // We can skip the message if it was already displayed to the user.
-///         .message("The original error message.")
+///     // We can skip the message if it was already displayed to the user.
+///     .message("The original error message.")
 ///
-///         // We can add some additional context in case the original message is confusing.
-///         .context("Some additional context.")
+///     // We can add some additional context in case the original message is confusing.
+///     .context("Some additional context.")
 ///
-///         // We can add even more context to narrow down where the error is occurring.
-///         .context("Even more specific context.");
+///     // We can add even more context to narrow down where the error is occurring.
+///     .context("Even more specific context.");
 ///
-///     error.exit();
-/// }
+/// error.exit();
+/// # }
 /// ```
 ///
 /// The above example, if run in an application, would result in the following being printed to
@@ -384,11 +384,9 @@ pub trait Inspect {
 
 impl Inspect for Error {
     fn get_context(&self) -> Option<Vec<&str>> {
-        if let Some(context) = &self.context {
-            Some(context.iter().map(|message| message.as_str()).collect())
-        } else {
-            None
-        }
+        self.context
+            .as_ref()
+            .map(|context| context.iter().map(|message| message.as_str()).collect())
     }
 
     fn get_message(&self) -> Option<&str> {
@@ -463,13 +461,13 @@ macro_rules! err {
 /// ```no_run
 /// use carli::error;
 ///
-/// fn main() {
-///     let error = error!(1);
+/// # fn main() {
+/// let error = error!(1);
 ///
-///     eprintln!("An example error message.");
+/// eprintln!("An example error message.");
 ///
-///     error.exit();
-/// }
+/// error.exit();
+/// # }
 /// ```
 ///
 /// ### With a message
@@ -477,11 +475,11 @@ macro_rules! err {
 /// ```no_run
 /// use carli::error;
 ///
-/// fn main() {
-///     let error = error!(1, "An example error message.");
+/// # fn main() {
+/// let error = error!(1, "An example error message.");
 ///
-///     error.exit();
-/// }
+/// error.exit();
+/// # }
 /// ```
 ///
 /// ### With a formatted message
@@ -489,11 +487,11 @@ macro_rules! err {
 /// ```no_run
 /// use carli::error;
 ///
-/// fn main() {
-///     let error = error!(1, "An example, {}, error message.", "formatted");
+/// # fn main() {
+/// let error = error!(1, "An example, {}, error message.", "formatted");
 ///
-///     error.exit();
-/// }
+/// error.exit();
+/// # }
 /// ```
 #[macro_export]
 macro_rules! error {

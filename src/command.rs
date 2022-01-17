@@ -42,29 +42,21 @@ use crate::{error, io};
 /// function to accept any arguments you may need.
 ///
 /// ```
-/// use carli::command::Execute;
-/// use carli::error::Result;
-/// use carli::io::{standard, Shared, Streams};
+/// use carli::io::Streams;
+/// use carli::prelude::cmd::*;
 /// use std::io::Write;
 ///
-/// /// An example command.
-/// struct Command {}
-///
-/// impl Execute<Streams> for Command {
-///     fn execute(&self, context: &Streams) -> Result<()> {
-///         writeln!(context.output(), "Hello, world!")?;
-///
-///         Ok(())
-///     }
+/// /// An example subcommand.
+/// struct Subcommand {
+///     /// A value specific to this subcommand.
+///     name: String,
 /// }
 ///
-/// /// Executes the example command.
-/// fn main() {
-///     let command = Command {};
-///     let streams = standard();
+/// impl Execute<Streams> for Subcommand {
+///     fn execute(&self, context: &Streams) -> Result<()> {
+///         writeln!(context.output(), "Hello, {}!", self.name)?;
 ///
-///     if let Err(error) = command.execute(&streams) {
-///         error.exit();
+///         Ok(())
 ///     }
 /// }
 /// ```
@@ -169,17 +161,6 @@ where
 ///         }
 ///
 ///         Ok(())
-///     }
-/// }
-///
-/// /// Executes the application.
-/// fn main() {
-///     // You can manage the instantiation of the application, or use a library to do it.
-///     let app = Application::new("world".to_string(), Subcommand::Hello);
-///
-///     // Execute the subcommand and handle any error appropriately.
-///     if let Err(error) = app.execute() {
-///         error.exit();
 ///     }
 /// }
 /// ```
