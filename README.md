@@ -17,8 +17,8 @@ Requirements
 Examples
 --------
 
-- [A single command application.](examples/single)
-- [A multi-command application.](example/multiple)
+- [A single command application.](examples/single.rs)
+- [A multi-command application.](examples/multiple)
 
 Documentation
 -------------
