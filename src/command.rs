@@ -179,10 +179,92 @@ pub trait Main: io::Shared + Sized {
     fn subcommand(&self) -> &dyn Execute<Self>;
 }
 
+/// Simplifies writing a line terminated string to the error output.
+///
+/// ### Writing a simple message
+///
+/// ```
+/// use carli::errorln;
+/// use carli::io::standard;
+/// # fn main() {
+/// let streams = standard();
+///
+/// errorln!(streams, "Writing to STDERR.").unwrap();
+/// # }
+/// ```
+///
+/// ### Writing a formatted message
+///
+/// ```
+/// use carli::errorln;
+/// use carli::io::standard;
+/// # fn main() {
+/// let streams = standard();
+///
+/// errorln!(streams, "Writing to {}.", "STDERR").unwrap();
+/// # }
+/// ```
+#[macro_export]
+macro_rules! errorln {
+    ($context:expr, $message:expr) => {{
+        use $crate::io::Shared;
+        use std::io::Write;
+
+        writeln!($context.error(), $message)
+    }};
+    ($context:expr, $message:expr, $($args:tt)*) => {{
+        use $crate::io::Shared;
+        use std::io::Write;
+
+        writeln!($context.error(), $message, $($args)*)
+    }};
+}
+
+/// Simplifies writing a line terminated string to the global output.
+///
+/// ### Writing a simple message
+///
+/// ```
+/// use carli::outputln;
+/// use carli::io::standard;
+/// # fn main() {
+/// let streams = standard();
+///
+/// outputln!(streams, "Writing to STDOUT.").unwrap();
+/// # }
+/// ```
+///
+/// ### Writing a formatted message
+///
+/// ```
+/// use carli::outputln;
+/// use carli::io::standard;
+/// # fn main() {
+/// let streams = standard();
+///
+/// outputln!(streams, "Writing to {}.", "STDOUT").unwrap();
+/// # }
+/// ```
+#[macro_export]
+macro_rules! outputln {
+    ($context:expr, $message:expr) => {{
+        use $crate::io::Shared;
+        use std::io::Write;
+
+        writeln!($context.output(), $message)
+    }};
+    ($context:expr, $message:expr, $($args:tt)*) => {{
+        use $crate::io::Shared;
+        use std::io::Write;
+
+        writeln!($context.output(), $message, $($args)*)
+    }};
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::io::Shared;
+    use crate::io::{memory, Shared};
     use std::cell;
     use std::io::{Seek, Write};
 
@@ -278,6 +360,32 @@ mod test {
     }
 
     #[test]
+    fn errorln_message() {
+        let streams = memory();
+
+        errorln!(streams, "test").unwrap();
+
+        let mut error = streams.error();
+
+        error.rewind().unwrap();
+
+        assert_eq!(error.to_string_lossy(), "test\n");
+    }
+
+    #[test]
+    fn errorln_message_formatted() {
+        let streams = memory();
+
+        errorln!(streams, "test {}", "message").unwrap();
+
+        let mut error = streams.error();
+
+        error.rewind().unwrap();
+
+        assert_eq!(error.to_string_lossy(), "test message\n");
+    }
+
+    #[test]
     fn execute_goodbye() {
         let app = Application::new("world".to_string(), Subcommand::Goodbye(Goodbye {}));
 
@@ -301,5 +409,31 @@ mod test {
         output.rewind().unwrap();
 
         assert_eq!(output.to_string_lossy(), "Hello, world!\n");
+    }
+
+    #[test]
+    fn outputln_message() {
+        let streams = memory();
+
+        outputln!(streams, "test").unwrap();
+
+        let mut output = streams.output();
+
+        output.rewind().unwrap();
+
+        assert_eq!(output.to_string_lossy(), "test\n");
+    }
+
+    #[test]
+    fn outputln_message_formatted() {
+        let streams = memory();
+
+        outputln!(streams, "test {}", "message").unwrap();
+
+        let mut output = streams.output();
+
+        output.rewind().unwrap();
+
+        assert_eq!(output.to_string_lossy(), "test message\n");
     }
 }
