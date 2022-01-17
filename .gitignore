@@ -7,6 +7,9 @@
 # Except the package manifest.
 !/Cargo.toml
 
+# Except the license.
+!/LICENSE
+
 # Except the examples.
 !/examples/
 !/examples/**
