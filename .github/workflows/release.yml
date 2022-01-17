@@ -1,0 +1,26 @@
+name: Releasing
+
+on:
+  push:
+    tags: "*"
+  workflow_dispatch: ~
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: Publish to Crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Toolchain Setup
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: "1.57.0"
+      - name: Publish
+        uses: actions-rs/cargo@v1
+        with:
+          command: publish
+          args: --token ${{ secrets.CRATES_TOKEN }}

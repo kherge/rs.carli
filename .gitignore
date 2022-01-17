@@ -4,6 +4,10 @@
 # Except the ignore file.
 !/.gitignore
 
+# Except the GitHub files.
+!/.github/
+!/.github/**
+
 # Except the package manifest.
 !/Cargo.toml
 
