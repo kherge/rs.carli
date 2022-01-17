@@ -14,6 +14,12 @@ Requirements
 
 - Rust 1.57+
 
+Examples
+--------
+
+- [A single command application.](examples/single)
+- [A multi-command application.](example/multiple)
+
 Documentation
 -------------
 
