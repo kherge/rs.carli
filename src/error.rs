@@ -639,11 +639,24 @@ mod test {
                 "The higher level message.".to_string()
             ])
         );
-        assert_eq!(
-            error.message,
-            Some("No such file or directory (os error 2)".to_string())
-        );
-        assert_eq!(error.status, 2);
+
+        #[cfg(not(windows))]
+        {
+            assert_eq!(
+                error.message,
+                Some("No such file or directory (os error 2)".to_string())
+            );
+            assert_eq!(error.status, 2);
+        }
+
+        #[cfg(windows)]
+        {
+            assert_eq!(
+                error.message,
+                Some("The system cannot find the path specified. (os error 3)".to_string())
+            );
+            assert_eq!(error.status, 3);
+        }
     }
 
     #[test]
