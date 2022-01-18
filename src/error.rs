@@ -68,7 +68,7 @@
 //!     No such file or directory (os error 2)
 //! ```
 
-use std::{fmt, io, process, sync};
+use std::{fmt, process};
 
 /// A trait to add context to an error result.
 ///
@@ -265,21 +265,29 @@ impl fmt::Display for Error {
     }
 }
 
-impl From<io::Error> for Error {
-    fn from(error: io::Error) -> Self {
-        Self {
-            context: None,
-            message: Some(error.to_string()),
-            status: error.raw_os_error().unwrap_or(1),
-        }
-    }
-}
+impl<T: std::error::Error> From<T> for Error {
+    fn from(error: T) -> Self {
+        let mut context = None;
+        let mut current = &error as &dyn std::error::Error;
+        let message;
 
-impl<T> From<sync::PoisonError<T>> for Error {
-    fn from(error: sync::PoisonError<T>) -> Self {
+        loop {
+            if let Some(next) = current.source() {
+                context
+                    .get_or_insert_with(|| Vec::new())
+                    .push(current.to_string());
+
+                current = next;
+            } else {
+                message = Some(current.to_string());
+
+                break;
+            }
+        }
+
         Self {
-            context: None,
-            message: Some(error.to_string()),
+            context,
+            message,
             status: 1,
         }
     }
@@ -592,6 +600,38 @@ mod test {
             format!("{}", error),
             "The higher level context message.\n  The lower level context message.\n    The original message.\n"
         );
+    }
+
+    #[test]
+    fn from_error() {
+        fn generate_error() -> Result<()> {
+            fn source_error() -> Result<()> {
+                let _ = std::fs::File::open("/should/not/exist")?;
+
+                Ok(())
+            }
+
+            source_error().context(|| "The lower level message.")?;
+
+            Ok(())
+        }
+
+        let error = generate_error()
+            .context(|| "The higher level message.")
+            .unwrap_err();
+
+        assert_eq!(
+            error.context,
+            Some(vec![
+                "The lower level message.".to_string(),
+                "The higher level message.".to_string()
+            ])
+        );
+        assert_eq!(
+            error.message,
+            Some("No such file or directory (os error 2)".to_string())
+        );
+        assert_eq!(error.status, 1);
     }
 
     #[test]
