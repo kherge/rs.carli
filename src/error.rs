@@ -265,21 +265,33 @@ impl fmt::Display for Error {
     }
 }
 
-impl<T: std::error::Error> From<T> for Error {
+impl<T: std::error::Error + 'static> From<T> for Error {
     fn from(error: T) -> Self {
         let mut context = None;
         let mut current = &error as &dyn std::error::Error;
         let message;
+        let mut status = 1;
 
+        // Allow for error source traversal.
         loop {
+            // If not at the lowest level, capture the error as context.
             if let Some(next) = current.source() {
                 context
                     .get_or_insert_with(|| Vec::new())
                     .push(current.to_string());
 
                 current = next;
+
+            // If at the lowest level, capture the message.
             } else {
                 message = Some(current.to_string());
+
+                // If std::io::Error, capture the OS error code as the status.
+                if let Some(other) = current.downcast_ref::<std::io::Error>() {
+                    if let Some(code) = other.raw_os_error() {
+                        status = code;
+                    }
+                }
 
                 break;
             }
@@ -288,7 +300,7 @@ impl<T: std::error::Error> From<T> for Error {
         Self {
             context,
             message,
-            status: 1,
+            status,
         }
     }
 }
@@ -631,7 +643,7 @@ mod test {
             error.message,
             Some("No such file or directory (os error 2)".to_string())
         );
-        assert_eq!(error.status, 1);
+        assert_eq!(error.status, 2);
     }
 
     #[test]
