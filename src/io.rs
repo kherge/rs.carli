@@ -529,7 +529,7 @@ mod test {
 
             assert_eq!(vec, b"test");
         } else {
-            assert!(false, "Unexpected StreamKind.");
+            panic!("Unexpected StreamKind.");
         }
     }
 

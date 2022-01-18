@@ -277,7 +277,7 @@ impl<T: std::error::Error + 'static> From<T> for Error {
             // If not at the lowest level, capture the error as context.
             if let Some(next) = current.source() {
                 context
-                    .get_or_insert_with(|| Vec::new())
+                    .get_or_insert_with(Vec::new)
                     .push(current.to_string());
 
                 current = next;
